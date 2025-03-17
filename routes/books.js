@@ -20,6 +20,7 @@ router.get("/", async function (req, res, next) {
 
 router.get("/:id", async function (req, res, next) {
   try {
+    validateISBN(req.params.id)
     const book = await Book.findOne(req.params.id);
     return res.json({ book });
   } catch (err) {
@@ -56,6 +57,7 @@ router.put("/:isbn", async function (req, res, next) {
 
 router.delete("/:isbn", async function (req, res, next) {
   try {
+    validateISBN(req.params.isbn);
     await Book.remove(req.params.isbn);
     return res.json({ message: "Book deleted" });
   } catch (err) {
