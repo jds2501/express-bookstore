@@ -72,6 +72,54 @@ describe('Books API Tests', () => {
             .expect(200, { "book": testBook });
     });
 
+    test('POST request with missing request body parameters', async () => {
+        await request(server)
+            .post('/books')
+            .expect(400);
+
+        const missingPropertyOnBook = { ...testBook };
+        delete missingPropertyOnBook.year;
+
+        await request(server)
+            .post('/books')
+            .send(missingPropertyOnBook)
+            .expect(400);
+    });
+
+    test('POST request with incorrect request body parameters', async () => {
+        await request(server)
+            .post('/books')
+            .send({
+                ...testBook,
+                "isbn": "dne",
+            })
+            .expect(400);
+
+        await request(server)
+            .post('/books')
+            .send({
+                ...testBook,
+                "amazon_url": "https://www.google.com/book",
+            })
+            .expect(400);
+
+        await request(server)
+            .post('/books')
+            .send({
+                ...testBook,
+                pages: 0
+            })
+            .expect(400);
+
+        await request(server)
+            .post('/books')
+            .send({
+                ...testBook,
+                year: 0
+            })
+            .expect(400);
+    });
+
     test("POST, PUT, GET request on a book", async () => {
         await request(server)
             .post('/books')

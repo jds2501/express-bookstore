@@ -45,7 +45,7 @@ const booksSchema = {
         "pages": { "type": "integer", "minimum": 1 },
         "publisher": { "type": "string", "format": "non_empty_string" },
         "title": { "type": "string", "format": "non_empty_string" },
-        "year": { "type": "integer", "minimum": 0 },
+        "year": { "type": "integer", "minimum": 1 },
     },
     "required": ["isbn", "amazon_url", "author", "language", "pages",
         "publisher", "title", "year"
