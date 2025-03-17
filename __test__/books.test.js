@@ -22,11 +22,21 @@ describe('Books API Tests', () => {
         await db.end();
     });
 
-    test('GET request', async () => {
-        expect(true).toBe(true);
+    test('GET request on /books with no books', async () => {
+        await request(server)
+            .get("/books")
+            .expect(200, { books: [] });
     });
 
-    test('POST request', async () => {
-        expect(true).toBe(true);
+    test('GET request on a book that does not exist', async () => {
+        await request(server)
+            .get("/books/9780333791035")
+            .expect(404);
     });
+
+    test('GET request on a book with an invalid isbn', async () => {
+        await request(server)
+            .get("/books/dne")
+            .expect(400);
+    })
 });
