@@ -140,6 +140,45 @@ describe('Books API Tests', () => {
             .expect(200, { "book": updatedBook });
     });
 
+    test('PUT request with incorrect request body parameters', async () => {
+        await request(server)
+            .post('/books')
+            .send(testBook)
+            .expect(201);
+
+        await request(server)
+            .put(`/books/${testBook["isbn"]}`)
+            .send({
+                ...testBook,
+                "isbn": "dne",
+            })
+            .expect(400);
+
+        await request(server)
+            .put(`/books/${testBook["isbn"]}`)
+            .send({
+                ...testBook,
+                "amazon_url": "https://www.google.com/book",
+            })
+            .expect(400);
+
+        await request(server)
+            .put(`/books/${testBook["isbn"]}`)
+            .send({
+                ...testBook,
+                pages: 0
+            })
+            .expect(400);
+
+        await request(server)
+            .put(`/books/${testBook["isbn"]}`)
+            .send({
+                ...testBook,
+                year: 0
+            })
+            .expect(400);
+    });
+
     test("POST, DELETE, GET request on book", async () => {
         await request(server)
             .post('/books')
