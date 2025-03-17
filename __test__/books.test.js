@@ -2,6 +2,17 @@ process.env.NODE_ENV = "test";
 const request = require('supertest');
 const db = require('../db');
 
+const testBook = {
+    "isbn": "9780192633361",
+    "amazon_url": "https://www.amazon.com/book",
+    "author": "Test",
+    "language": "Spanish",
+    "pages": 90,
+    "publisher": "Max",
+    "title": "the game",
+    "year": 2010
+};
+
 describe('Books API Tests', () => {
     let server;
 
@@ -42,5 +53,42 @@ describe('Books API Tests', () => {
         await request(server)
             .get("/books/dne")
             .expect(400);
-    })
+    });
+
+    test('POST request to create book and get it after', async () => {
+        const postResponse = await request(server)
+            .post('/books')
+            .send(testBook)
+            .expect(201);
+
+        expect(postResponse.body.book).toStrictEqual(testBook);
+
+        await request(server)
+            .get("/books")
+            .expect(200, { "books": [testBook] });
+
+        await request(server)
+            .get(`/books/${testBook["isbn"]}`)
+            .expect(200, { "book": testBook });
+    });
+
+    test("POST, PUT, GET request on a book", async () => {
+        await request(server)
+            .post('/books')
+            .send(testBook)
+            .expect(201);
+
+        const updatedBook = { ...testBook, "pages": 290 };
+
+        const putResponse = await request(server)
+            .put(`/books/${testBook["isbn"]}`)
+            .send(updatedBook)
+            .expect(200);
+
+        expect(putResponse.body.book).toStrictEqual(updatedBook);
+
+        await request(server)
+            .get(`/books/${testBook["isbn"]}`)
+            .expect(200, { "book": updatedBook });
+    });
 });
