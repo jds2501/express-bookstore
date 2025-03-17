@@ -1,7 +1,7 @@
 const Validator = require('jsonschema').Validator;
 const ExpressError = require('../expressError');
 
-Validator.prototype.customFormats.isbn = (isbn) => {
+function isValidISBN(isbn) {
     // Remove hyphens and spaces
     isbn = isbn.replace(/[-\s]/g, "");
 
@@ -21,6 +21,8 @@ Validator.prototype.customFormats.isbn = (isbn) => {
     // Valid if sum is a multiple of 10
     return sum % 10 === 0;
 }
+
+Validator.prototype.customFormats.isbn = isValidISBN;
 
 Validator.prototype.customFormats.amazon_url = (input) => {
     return input.startsWith("https://www.amazon.com/");
@@ -50,18 +52,15 @@ const booksSchema = {
     ]
 };
 
-const test = {
-    "isbn": "978-0-306-40615-7",
-    "amazon_url": "https://www.amazon.com/book",
-    "author": "",
-    "language": "English",
-    "pages": 20,
-    "publisher": "",
-    "title": "The Game",
-    "year": 2010
-};
-
 v.addSchema(booksSchema, '/books');
+
+function validateISBN(isbn) {
+    const result = isValidISBN(isbn);
+
+    if (!result) {
+        throw new ExpressError(`${isbn} is not a valid ISBN`, 400);
+    }
+}
 
 function validateBookJSON(bookJSON) {
     const result = v.validate(bookJSON, booksSchema);
@@ -84,11 +83,5 @@ function validateBookJSON(bookJSON) {
     }
 }
 
-try {
-    validateBookJSON(test);
-} catch (err) {
-    console.log(err.toString());
-}
 
-
-module.exports = validateBookJSON;
+module.exports = { validateBookJSON, validateISBN };

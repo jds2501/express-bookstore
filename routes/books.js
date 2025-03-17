@@ -1,5 +1,6 @@
 const express = require("express");
 const Book = require("../models/book");
+const { validateBookJSON, validateISBN } = require("../validators/books_validator");
 
 const router = new express.Router();
 
@@ -30,6 +31,7 @@ router.get("/:id", async function (req, res, next) {
 
 router.post("/", async function (req, res, next) {
   try {
+    validateBookJSON(req.body);
     const book = await Book.create(req.body);
     return res.status(201).json({ book });
   } catch (err) {
@@ -41,6 +43,8 @@ router.post("/", async function (req, res, next) {
 
 router.put("/:isbn", async function (req, res, next) {
   try {
+    validateISBN(req.params.isbn);
+    validateBookJSON(req.body);
     const book = await Book.update(req.params.isbn, req.body);
     return res.json({ book });
   } catch (err) {
