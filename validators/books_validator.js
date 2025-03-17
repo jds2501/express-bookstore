@@ -1,4 +1,5 @@
 const Validator = require('jsonschema').Validator;
+const ExpressError = require('../expressError');
 
 Validator.prototype.customFormats.isbn = (isbn) => {
     // Remove hyphens and spaces
@@ -52,13 +53,42 @@ const booksSchema = {
 const test = {
     "isbn": "978-0-306-40615-7",
     "amazon_url": "https://www.amazon.com/book",
-    "author": "Greg",
+    "author": "",
     "language": "English",
     "pages": 20,
-    "publisher": "ax",
+    "publisher": "",
     "title": "The Game",
     "year": 2010
 };
 
 v.addSchema(booksSchema, '/books');
-console.log(v.validate(test, booksSchema));
+
+function validateBookJSON(bookJSON) {
+    const result = v.validate(bookJSON, booksSchema);
+
+    if (!result.valid) {
+        let failedValidationProperties = "";
+
+        for (let index = 0; index < result.errors.length; index++) {
+            const error = result.errors[index];
+            const property = error.property.replace("instance.", "");
+            failedValidationProperties += property;
+
+            if (index < result.errors.length - 1) {
+                failedValidationProperties += ", ";
+            }
+        }
+
+        failedValidationProperties += " didn't meet schema requirements";
+        throw new ExpressError(failedValidationProperties, 400);
+    }
+}
+
+try {
+    validateBookJSON(test);
+} catch (err) {
+    console.log(err.toString());
+}
+
+
+module.exports = validateBookJSON;
