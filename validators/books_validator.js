@@ -1,4 +1,5 @@
 const Validator = require('jsonschema').Validator;
+
 Validator.prototype.customFormats.isbn = (isbn) => {
     // Remove hyphens and spaces
     isbn = isbn.replace(/[-\s]/g, "");
@@ -19,9 +20,14 @@ Validator.prototype.customFormats.isbn = (isbn) => {
     // Valid if sum is a multiple of 10
     return sum % 10 === 0;
 }
+
 Validator.prototype.customFormats.amazon_url = (input) => {
     return input.startsWith("https://www.amazon.com/");
 };
+
+Validator.prototype.customFormats.non_empty_string = (input) => {
+    return input.length > 0;
+}
 
 const v = new Validator();
 
@@ -31,11 +37,11 @@ const booksSchema = {
     "properties": {
         "isbn": { "type": "string", "format": "isbn" },
         "amazon_url": { "type": "string", "format": "amazon_url" },
-        "author": { "type": "string" },
-        "language": { "type": "string" },
+        "author": { "type": "string", "format": "non_empty_string" },
+        "language": { "type": "string", "format": "non_empty_string" },
         "pages": { "type": "integer", "minimum": 1 },
-        "publisher": { "type": "string" },
-        "title": { "type": "string" },
+        "publisher": { "type": "string", "format": "non_empty_string" },
+        "title": { "type": "string", "format": "non_empty_string" },
         "year": { "type": "integer", "minimum": 0 },
     },
     "required": ["isbn", "amazon_url", "author", "language", "pages",
@@ -49,7 +55,7 @@ const test = {
     "author": "Greg",
     "language": "English",
     "pages": 20,
-    "publisher": "Max",
+    "publisher": "ax",
     "title": "The Game",
     "year": 2010
 };
