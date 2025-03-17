@@ -91,4 +91,21 @@ describe('Books API Tests', () => {
             .get(`/books/${testBook["isbn"]}`)
             .expect(200, { "book": updatedBook });
     });
+
+    test("POST, DELETE, GET request on book", async () => {
+        await request(server)
+            .post('/books')
+            .send(testBook)
+            .expect(201);
+
+        const deleteResponse = await request(server)
+            .delete(`/books/${testBook["isbn"]}`)
+            .expect(200);
+
+        expect(deleteResponse.body.message).toBe("Book deleted");
+
+        await request(server)
+            .get("/books")
+            .expect(200, { books: [] });
+    })
 });
