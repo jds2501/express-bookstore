@@ -7,18 +7,22 @@ describe('Books API Tests', () => {
 
     beforeAll(async () => {
         await db.connect();
-    })
-
-    beforeEach(async () => {
         const app = require('../app');
         server = app.listen();
     });
 
+    beforeEach(async () => {
+        await db.query("BEGIN");
+    });
+
     afterEach(async () => {
-        server.close();
+        await db.query("ROLLBACK");
     });
 
     afterAll(async () => {
+        if (server) {
+            await new Promise((resolve) => server.close(resolve));
+        }
         await db.end();
     });
 
